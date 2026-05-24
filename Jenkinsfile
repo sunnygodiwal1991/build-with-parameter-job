@@ -6,8 +6,7 @@ pipeline {
 
         buildDiscarder(
             logRotator(
-                daysToKeepStr: '10',
-                numToKeepStr: '10'
+                numToKeepStr: '5'
             )
         )
 
@@ -183,11 +182,6 @@ pipeline {
         failure {
 
             echo "Pipeline failed"
-        }
-
-        always {
-
-            cleanWs()
         }
     }
 }
