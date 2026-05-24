@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME    = "my-app"
-        DEV_SERVER  = "dev.example.com"
-        PROD_SERVER = "prod.example.com"
+        APP_NAME     = "my-app"
+        DEV_SERVER   = "dev.example.com"
+        STAGE_SERVER = "stage.example.com"
+        PROD_SERVER  = "prod.example.com"
     }
 
     stages {
@@ -27,6 +28,14 @@ pipeline {
                     if (env.BRANCH_NAME == "main") {
 
                         env.DEPLOY_ENV = "prod"
+
+                    }
+                    else if (
+                        env.BRANCH_NAME == "stage" ||
+                        env.BRANCH_NAME == "staging"
+                    ) {
+
+                        env.DEPLOY_ENV = "stage"
 
                     }
                     else if (
@@ -60,6 +69,8 @@ pipeline {
 
                 sh '''
                     echo "Running build..."
+                    # npm install
+                    # npm run build
                 '''
             }
         }
@@ -73,8 +84,28 @@ pipeline {
 
             steps {
 
-                echo "Deploying to DEV Server"
+                echo "Deploying to DEV Server: ${DEV_SERVER}"
 
+                sh '''
+                    echo "DEV deployment started..."
+                '''
+            }
+        }
+
+        stage('Deploy STAGE') {
+            when {
+                expression {
+                    env.DEPLOY_ENV == "stage"
+                }
+            }
+
+            steps {
+
+                echo "Deploying to STAGE Server: ${STAGE_SERVER}"
+
+                sh '''
+                    echo "STAGE deployment started..."
+                '''
             }
         }
 
@@ -89,8 +120,11 @@ pipeline {
 
                 input message: 'Deploy to Production?', ok: 'Deploy'
 
-                echo "Deploying to PROD Server"
+                echo "Deploying to PROD Server: ${PROD_SERVER}"
 
+                sh '''
+                    echo "PROD deployment started..."
+                '''
             }
         }
     }
