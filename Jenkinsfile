@@ -2,26 +2,19 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = "my-app"
-        DEV_SERVER = "dev.example.com"
+        APP_NAME    = "my-app"
+        DEV_SERVER  = "dev.example.com"
         PROD_SERVER = "prod.example.com"
-    }
-
-    triggers {
-        githubPush()
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-        
-                git(
-                    branch: 'dev',
-                    credentialsId: 'parameter-token',
-                    url: 'https://github.com/sunnygodiwal1991/build-with-parameter-job.git'
-                )
-        
+
+                // Multibranch pipeline SCM checkout
+                checkout scm
+
             }
         }
 
@@ -29,19 +22,23 @@ pipeline {
             steps {
                 script {
 
-                    // branch name detect
-                    def branch = env.BRANCH_NAME
+                    echo "Current Branch: ${env.BRANCH_NAME}"
 
-                    echo "Current Branch: ${branch}"
+                    if (env.BRANCH_NAME == "main") {
 
-                    // ENV decide based on branch
-                    if (branch == "main") {
                         env.DEPLOY_ENV = "prod"
+
                     }
-                    else if (branch == "develop") {
+                    else if (
+                        env.BRANCH_NAME == "dev" ||
+                        env.BRANCH_NAME == "develop"
+                    ) {
+
                         env.DEPLOY_ENV = "dev"
+
                     }
                     else {
+
                         env.DEPLOY_ENV = "none"
                     }
 
@@ -52,68 +49,48 @@ pipeline {
 
         stage('Build') {
             when {
-                expression { env.DEPLOY_ENV != "none" }
+                expression {
+                    env.DEPLOY_ENV != "none"
+                }
             }
 
             steps {
+
                 echo "Building application..."
 
                 sh '''
                     echo "Running build..."
-                    # Example:
-                    # npm install
-                    # npm run build
                 '''
             }
         }
 
-        stage('Deploy to DEV') {
+        stage('Deploy DEV') {
             when {
-                expression { env.DEPLOY_ENV == "dev" }
+                expression {
+                    env.DEPLOY_ENV == "dev"
+                }
             }
 
             steps {
+
                 echo "Deploying to DEV Server"
 
-                sh """
-                    echo "Deploying ${APP_NAME} to ${DEV_SERVER}"
-
-                    # Example deployment commands
-
-                    # scp -r build/* user@${DEV_SERVER}:/var/www/app/
-
-                    # ssh user@${DEV_SERVER} '
-                    #   cd /var/www/app &&
-                    #   docker compose restart
-                    # '
-                """
             }
         }
 
-        stage('Deploy to PROD') {
+        stage('Deploy PROD') {
             when {
-                expression { env.DEPLOY_ENV == "prod" }
+                expression {
+                    env.DEPLOY_ENV == "prod"
+                }
             }
 
             steps {
 
-                // optional manual approval
                 input message: 'Deploy to Production?', ok: 'Deploy'
 
                 echo "Deploying to PROD Server"
 
-                sh """
-                    echo "Deploying ${APP_NAME} to ${PROD_SERVER}"
-
-                    # Example deployment commands
-
-                    # scp -r build/* user@${PROD_SERVER}:/var/www/app/
-
-                    # ssh user@${PROD_SERVER} '
-                    #   cd /var/www/app &&
-                    #   docker compose restart
-                    # '
-                """
             }
         }
     }
