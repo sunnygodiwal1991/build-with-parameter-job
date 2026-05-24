@@ -124,6 +124,8 @@ pipeline {
                 echo "Deploying to DEV Server: ${DEV_SERVER}"
 
                 sh '''
+                    echo "##################### Endpoint ############### "
+                    echo "https://$DEV_SERVER"
                     echo "DEV deployment started..."
                 '''
             }
@@ -141,6 +143,8 @@ pipeline {
                 echo "Deploying to STAGE Server: ${STAGE_SERVER}"
 
                 sh '''
+                    echo "##################### Endpoint ############### "
+                    echo "https://$STAGE_SERVER"                
                     echo "STAGE deployment started..."
                 '''
             }
@@ -166,6 +170,7 @@ pipeline {
                 echo "Deploying to PROD Server: ${PROD_SERVER}"
 
                 sh '''
+                    echo "https://$PROD_SERVER" 
                     echo "PROD deployment started..."
                 '''
             }
