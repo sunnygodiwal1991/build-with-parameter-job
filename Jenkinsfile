@@ -1,7 +1,29 @@
 pipeline {
+
     agent any
 
+    options {
+
+        buildDiscarder(
+            logRotator(
+                daysToKeepStr: '10',
+                numToKeepStr: '10'
+            )
+        )
+
+        disableConcurrentBuilds()
+
+        timeout(time: 30, unit: 'MINUTES')
+
+        timestamps()
+
+        ansiColor('xterm')
+
+        skipDefaultCheckout(true)
+    }
+
     environment {
+
         APP_NAME     = "my-app"
         DEV_SERVER   = "dev.example.com"
         STAGE_SERVER = "stage.example.com"
@@ -9,6 +31,14 @@ pipeline {
     }
 
     stages {
+
+        stage('Cleanup Workspace') {
+            steps {
+
+                cleanWs()
+
+            }
+        }
 
         stage('Checkout') {
             steps {
@@ -21,6 +51,7 @@ pipeline {
 
         stage('Detect Branch') {
             steps {
+
                 script {
 
                     echo "Current Branch: ${env.BRANCH_NAME}"
@@ -52,6 +83,9 @@ pipeline {
                     }
 
                     echo "Deployment Environment: ${env.DEPLOY_ENV}"
+
+                    currentBuild.displayName =
+                        "#${BUILD_NUMBER}"
                 }
             }
         }
@@ -67,11 +101,15 @@ pipeline {
 
                 echo "Building application..."
 
-                sh '''
-                    echo "Running build..."
-                    # npm install
-                    # npm run build
-                '''
+                retry(3) {
+
+                    sh '''
+                        echo "Running build..."
+
+                        # npm install
+                        # npm run build
+                    '''
+                }
             }
         }
 
@@ -118,7 +156,13 @@ pipeline {
 
             steps {
 
-                input message: 'Deploy to Production?', ok: 'Deploy'
+                timeout(time: 5, unit: 'MINUTES') {
+
+                    input(
+                        message: 'Deploy to Production?',
+                        ok: 'Deploy'
+                    )
+                }
 
                 echo "Deploying to PROD Server: ${PROD_SERVER}"
 
@@ -132,11 +176,18 @@ pipeline {
     post {
 
         success {
+
             echo "Pipeline completed successfully"
         }
 
         failure {
+
             echo "Pipeline failed"
+        }
+
+        always {
+
+            cleanWs()
         }
     }
 }
