@@ -22,11 +22,13 @@ pipeline {
     }
 
     environment {
-
         APP_NAME     = "my-app"
         DEV_SERVER   = "dev.example.com"
+        DEV_SERVER_ENDPOINT   = "https://dev.example.com/health"
         STAGE_SERVER = "stage.example.com"
+        STAGE_SERVER_ENDPOINT   = "https://stage.example.com/health"        
         PROD_SERVER  = "prod.example.com"
+        PROD_SERVER_ENDPOINT   = "https://prod.example.com/health"        
     }
 
     stages {
@@ -124,12 +126,10 @@ pipeline {
             }
 
             steps {
-
                 echo "Deploying to DEV Server: ${DEV_SERVER}"
+                echo "App Endpoint: ${DEV_SERVER_ENDPOINT}"
 
                 sh '''
-                    echo "##################### Endpoint ############### "
-                    echo "https://$DEV_SERVER"
                     echo "DEV deployment started..."
                 '''
             }
@@ -143,12 +143,10 @@ pipeline {
             }
 
             steps {
-
                 echo "Deploying to STAGE Server: ${STAGE_SERVER}"
+                echo "App Endpoint: ${STAGE_SERVER_ENDPOINT}"                
 
                 sh '''
-                    echo "##################### Endpoint ############### "
-                    echo "https://$STAGE_SERVER"                
                     echo "STAGE deployment started..."
                 '''
             }
@@ -172,9 +170,9 @@ pipeline {
                 }
 
                 echo "Deploying to PROD Server: ${PROD_SERVER}"
+                echo "App Endpoint: ${PROD_SERVER_ENDPOINT}"                   
 
                 sh '''
-                    echo "https://$PROD_SERVER" 
                     echo "PROD deployment started..."
                 '''
             }
