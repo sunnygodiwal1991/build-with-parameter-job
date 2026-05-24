@@ -17,7 +17,7 @@ pipeline {
             steps {
         
                 git(
-                    branch: 'main',
+                    branch: 'dev',
                     credentialsId: 'parameter-token',
                     url: 'https://github.com/sunnygodiwal1991/build-with-parameter-job.git'
                 )
