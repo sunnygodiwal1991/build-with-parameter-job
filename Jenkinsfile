@@ -55,11 +55,15 @@ pipeline {
 
                     echo "Current Branch: ${env.BRANCH_NAME}"
 
-                    if (env.BRANCH_NAME == "main") {
-
+                    if (
+                        env.BRANCH_NAME == "main" ||
+                        env.BRANCH_NAME == "master" ||
+                        env.BRANCH_NAME == "prod"
+                    ) {
+                    
                         env.DEPLOY_ENV = "prod"
-
                     }
+
                     else if (
                         env.BRANCH_NAME == "stage" ||
                         env.BRANCH_NAME == "staging"
